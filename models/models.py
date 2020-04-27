@@ -31,20 +31,20 @@ class SegmentationModule(SegmentationModuleBase):
         # training
         if segSize is None:
             if self.deep_sup_scale is not None: # use deep supervision technique
-                (pred, pred_deepsup) = self.decoder(self.encoder(feed_dict[0]['img_data'], return_feature_maps=True))
+                (pred, pred_deepsup) = self.decoder(self.encoder(feed_dict[0]['img_data'].cuda(), return_feature_maps=True))
             else:
-                pred = self.decoder(self.encoder(feed_dict[0]['img_data'], return_feature_maps=True))
+                pred = self.decoder(self.encoder(feed_dict[0]['img_data'].cuda(), return_feature_maps=True))
 
-            loss = self.crit(pred, feed_dict[0]['seg_label'])
+            loss = self.crit(pred, feed_dict[0]['seg_label'].cuda())
             if self.deep_sup_scale is not None:
-                loss_deepsup = self.crit(pred_deepsup, feed_dict[0]['seg_label'])
+                loss_deepsup = self.crit(pred_deepsup, feed_dict[0]['seg_label'].cuda())
                 loss = loss + loss_deepsup * self.deep_sup_scale
 
-            acc = self.pixel_acc(pred, feed_dict[0]['seg_label'])
+            acc = self.pixel_acc(pred, feed_dict[0]['seg_label'].cuda())
             return loss, acc
         # inference
         else:
-            pred = self.decoder(self.encoder(feed_dict[0]['img_data'], return_feature_maps=True), segSize=segSize)
+            pred = self.decoder(self.encoder(feed_dict[0]['img_data'].cuda(), return_feature_maps=True), segSize=segSize)
             return pred
 
 
