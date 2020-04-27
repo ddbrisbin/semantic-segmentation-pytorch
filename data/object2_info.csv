@@ -1,0 +1,3 @@
+﻿Idx,Ratio,Train,Val,Stuff,Name
+1,0.8,231,58,0,env
+2,0.2,231,58,0,road
