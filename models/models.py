@@ -48,6 +48,35 @@ class SegmentationModule(SegmentationModuleBase):
             return pred
 
 
+class SegmentationModuleEval(SegmentationModuleBase):
+    def __init__(self, net_enc, net_dec, crit, deep_sup_scale=None):
+        super(SegmentationModuleEval, self).__init__()
+        self.encoder = net_enc
+        self.decoder = net_dec
+        self.crit = crit
+        self.deep_sup_scale = deep_sup_scale
+
+    def forward(self, feed_dict, *, segSize=None):
+        # training
+        if segSize is None:
+            if self.deep_sup_scale is not None: # use deep supervision technique
+                (pred, pred_deepsup) = self.decoder(self.encoder(feed_dict['img_data'].cuda(), return_feature_maps=True))
+            else:
+                pred = self.decoder(self.encoder(feed_dict['img_data'].cuda(), return_feature_maps=True))
+
+            loss = self.crit(pred, feed_dict['seg_label'].cuda())
+            if self.deep_sup_scale is not None:
+                loss_deepsup = self.crit(pred_deepsup, feed_dict['seg_label'].cuda())
+                loss = loss + loss_deepsup * self.deep_sup_scale
+
+            acc = self.pixel_acc(pred, feed_dict['seg_label'].cuda())
+            return loss, acc
+        # inference
+        else:
+            pred = self.decoder(self.encoder(feed_dict['img_data'].cuda(), return_feature_maps=True), segSize=segSize)
+            return pred
+
+
 class ModelBuilder:
     # custom weights initialization
     @staticmethod
