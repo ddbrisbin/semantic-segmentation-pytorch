@@ -111,7 +111,7 @@ def worker(cfg, gpu_id, start_idx, end_idx, result_queue):
 
     crit = nn.NLLLoss(ignore_index=-1)
 
-    segmentation_module = SegmentationModuleEval(net_encoder, net_decoder, crit)
+    segmentation_module = SegmentationModule(net_encoder, net_decoder, crit)
 
     segmentation_module.cuda()
 
